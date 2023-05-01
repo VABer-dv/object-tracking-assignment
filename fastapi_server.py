@@ -3,6 +3,8 @@ from track_3 import track_data, country_balls_amount
 import asyncio
 import glob
 
+from metrics import MetricsAccumulator
+
 app = FastAPI(title='Tracker assignment')
 imgs = glob.glob('imgs/*')
 country_balls = [{'cb_id': x, 'img': imgs[x % len(imgs)]} for x in range(country_balls_amount)]
@@ -58,10 +60,14 @@ async def websocket_endpoint(websocket: WebSocket):
     # отправка служебной информации для инициализации объектов
     # класса CountryBall на фронте
     await websocket.send_text(str(country_balls))
+
+    accumulator = MetricsAccumulator()
+
     for el in track_data:
         await asyncio.sleep(0.5)
         # TODO: part 1
         el = tracker_soft(el)
+        accumulator.update(el)
         # TODO: part 2
         # el = tracker_strong(el)
         # отправка информации по фрейму
